@@ -54,8 +54,20 @@ def split_documents(document,chunk_size=880,chunk_overlap=0):
         print(f"Page Content {doc.page_content[:50]}")
         print(f"Meta Data: {doc.metadata}")
     return chunks
+
+def create_vector_embeddings(chunks,persist_directory="db/chroma_db"):
+    embedding_model=HuggingFaceEmbeddings(model_name="BAAI/bge-small-en-v1.5")
+
+    db=Chroma.from_documents(
+        embedding=embedding_model,
+        persist_directory=persist_directory,
+        collection_metadata={"hnsw:space":"cosine"},
+        documents=chunks
+    )
+    return db
 def main():
-    doc=load_pdf("docs")
+    doc=load_document("docs")
     chunks=split_documents(doc)
+    db=create_vector_embeddings(chunks)
 if __name__=="__main__":
     main()
